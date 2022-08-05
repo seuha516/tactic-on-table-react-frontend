@@ -1,17 +1,34 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import { legacy_createStore as createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import createSagaMiddleware from 'redux-saga';
+import { composeWithDevTools } from 'redux-devtools-extension';
+
+import rootReducer, { rootSaga } from 'modules';
+import { changeField, check } from 'modules/users';
+
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+
+const sagaMiddleware = createSagaMiddleware();
+const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(sagaMiddleware)));
+function loadUser() {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) return;
+    store.dispatch(changeField({ key: 'user', value: user }));
+    store.dispatch(check());
+  } catch (e) {
+    console.log('localStorage is not working.', e);
+  }
+}
+sagaMiddleware.run(rootSaga);
+loadUser();
+document.getElementById('root').setAttribute('spellcheck', 'false');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  <Provider store={store}>
     <App />
-  </React.StrictMode>
+  </Provider>,
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
