@@ -8,7 +8,9 @@ import NanumSquareR from 'assets/fonts/NanumSquareR.ttf';
 
 import Header from './components/sections/Header';
 import Home from './pages/home/Home';
-import Games from './pages/games/Games';
+import Games from './pages/home/Games';
+import MatchRecord from './pages/home/MatchRecord';
+import Ranking from './pages/home/Ranking';
 
 const GlobalStyles = createGlobalStyle`
   ${reset}
@@ -82,6 +84,8 @@ function App() {
         <Routes>
           <Route path="" element={<Home />} />
           <Route path="games" element={<Games />} />
+          <Route path="match_record" element={<MatchRecord />} />
+          <Route path="ranking" element={<Ranking />} />
         </Routes>
       </BrowserRouter>
     </>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { AiOutlineReload, AiOutlineCloseCircle, AiFillLock, AiOutlineWarning } from 'react-icons/ai';
 import { BiFileFind, BiLogIn } from 'react-icons/bi';
+import { BsPeopleFill, BsFillPencilFill } from 'react-icons/bs';
 import { FiUserPlus } from 'react-icons/fi';
 import styled, { css } from 'styled-components';
 
@@ -10,6 +11,123 @@ import { gameData } from 'lib/data/gameList';
 // TEST VARIABLE.
 const condition1 = true; // 로그인 여부.
 const var1 = '익명3536'; // 임시 익명 닉네임
+const var2 = 13; // 채팅 인원수
+const tempUser = {
+  username: 'abcd11',
+  nickname: '진짜전승하',
+  image: 'zl8592jig88zugk2f9cwa66bunixj7cys86d.png',
+};
+const tempChatLog = [
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'jnddsowj7thcc17i9zy96ngtvkvczjiq6q0n.png',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'p5ehejszkony7y1f3ch5o8eeaepk78yd8wzy.jpeg',
+    },
+    content:
+      '안녕하세요안녕하세요안녕하세요안녕하세요안녕하세요안녕하세요안녕하세요안녕하세요안녕하세요안녕하세요안녕하세요안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'jnddsowj7thcc17i9zy96ngtvkvczjiq6q0n.png',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'p5ehejszkony7y1f3ch5o8eeaepk78yd8wzy.jpeg',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'jnddsowj7thcc17i9zy96ngtvkvczjiq6q0n.png',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'p5ehejszkony7y1f3ch5o8eeaepk78yd8wzy.jpeg',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'jnddsowj7thcc17i9zy96ngtvkvczjiq6q0n.png',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'p5ehejszkony7y1f3ch5o8eeaepk78yd8wzy.jpeg',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'jnddsowj7thcc17i9zy96ngtvkvczjiq6q0n.png',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'p5ehejszkony7y1f3ch5o8eeaepk78yd8wzy.jpeg',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'jnddsowj7thcc17i9zy96ngtvkvczjiq6q0n.png',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+  {
+    user: {
+      username: 'seuha516',
+      nickname: '전승하123',
+      image: 'p5ehejszkony7y1f3ch5o8eeaepk78yd8wzy.jpeg',
+    },
+    content: '안녕하세요',
+    time: new Date(),
+  },
+];
 
 const POPUP_STATUS = {
   NONE: 0,
@@ -26,14 +144,63 @@ const DEFAULT_ROOM_INFO = {
 const Games = () => {
   const [popUp, setPopUp] = useState(POPUP_STATUS.NONE);
   const [roomInfo, setRoomInfo] = useState(DEFAULT_ROOM_INFO);
+  const [chatLog, setChatLog] = useState(tempChatLog);
+  const [chatInput, setChatInput] = useState('');
   const popUpRef1 = useRef(null);
   const popUpRef2 = useRef(null);
+  const chatLogRef = useRef(null);
+
+  const webSocketUrl = `ws://localhost:8000/ws/chat/afd/`;
+  let ws = useRef(null);
+  useEffect(() => {
+    if (!ws.current) {
+      ws.current = new WebSocket(webSocketUrl);
+      ws.current.onopen = () => {
+        console.log('connected to ' + webSocketUrl);
+      };
+      ws.current.onclose = error => {
+        console.log('disconnect from ' + webSocketUrl);
+        console.log(error);
+      };
+      ws.current.onerror = error => {
+        console.log('connection error ' + webSocketUrl);
+        console.log(error);
+      };
+      ws.current.onmessage = e => {
+        const data = JSON.parse(e.data);
+        setChatLog(prevItems => [...prevItems, data.message]);
+      };
+    }
+    return () => {
+      console.log('clean up');
+      ws.current.close();
+    };
+  }, []);
 
   const onQuickMatch = game => {
     alert(`${game}를 선택했습니다.`);
   };
   const onCreateRoom = () => {
     alert(JSON.stringify(roomInfo));
+  };
+  const onSendMessage = () => {
+    if (chatInput === '') return;
+    ws.current.send(
+      JSON.stringify({
+        message: {
+          user: tempUser,
+          content: chatInput,
+          time: new Date(),
+        },
+      }),
+    );
+    setChatInput('');
+  };
+
+  const scrollEnd = () => {
+    if (chatLogRef.current) {
+      chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -52,51 +219,9 @@ const Games = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [popUpRef1, popUpRef2]);
-
-  // const [socketConnected, setSocketConnected] = useState(false);
-  // const [sendMsg, setSendMsg] = useState(false);
-  // const [items, setItems] = useState([]);
-  // const webSocketUrl = `ws://localhost:8000/ws/chat/afd/`;
-  // let ws = useRef(null);
-  // useEffect(() => {
-  //   if (!ws.current) {
-  //     console.log('시작');
-  //     ws.current = new WebSocket(webSocketUrl);
-  //     ws.current.onopen = () => {
-  //       console.log('connected to ' + webSocketUrl);
-  //       setSocketConnected(true);
-  //     };
-  //     ws.current.onclose = error => {
-  //       console.log('disconnect from ' + webSocketUrl);
-  //       console.log(error);
-  //     };
-  //     ws.current.onerror = error => {
-  //       console.log('connection error ' + webSocketUrl);
-  //       console.log(error);
-  //     };
-  //     ws.current.onmessage = evt => {
-  //       const data = JSON.parse(evt.data);
-  //       console.log(data);
-  //       setItems(prevItems => [...prevItems, data]);
-  //     };
-  //   }
-  //   return () => {
-  //     console.log('clean up');
-  //     ws.current.close();
-  //   };
-  // }, []);
-  // useEffect(() => {
-  //   console.log('연결됨!');
-  //   if (socketConnected) {
-  //     ws.current.send(
-  //       JSON.stringify({
-  //         type: 'ddd',
-  //         message: 'ddd',
-  //       }),
-  //     )
-  //     setSendMsg(true);
-  //   }
-  // }, [socketConnected]);
+  useEffect(() => {
+    scrollEnd();
+  }, [chatLog]);
 
   return (
     <Wrapper>
@@ -137,7 +262,39 @@ const Games = () => {
           </LobbyButtonWrapper>
         </LobbyWrapper>
 
-        <ChattingWrapper></ChattingWrapper>
+        <ChattingWrapper>
+          <ChattingInfoWrapper>
+            <ChattingTitle>Chat</ChattingTitle>
+            <ChattingInfo>
+              <BsPeopleFill />
+              {var2}
+            </ChattingInfo>
+          </ChattingInfoWrapper>
+          <ChattingLogWrapper ref={chatLogRef}>
+            {chatLog.map((x, idx) => (
+              <ChatWrapper key={idx} my={true}>
+                <ChatImage src={process.env.REACT_APP_API_IMAGE + x.user.image} alt="ProfileImage" />
+                <ChatContentWrapper>
+                  <ChatNickname>{x.user.nickname}</ChatNickname>
+                  <div>{x.content}</div>
+                </ChatContentWrapper>
+              </ChatWrapper>
+            ))}
+          </ChattingLogWrapper>
+          <ChattingInputWrapper>
+            <InputWrapper
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              onKeyPress={e => {
+                if (e.key === 'Enter') onSendMessage();
+              }}
+              placeholder="댓글을 입력하세요."
+            />
+            <InputWriteButton onClick={onSendMessage}>
+              <BsFillPencilFill />
+            </InputWriteButton>
+          </ChattingInputWrapper>
+        </ChattingWrapper>
       </ContentWrapper>
 
       <QuickStartPopUp open={popUp === POPUP_STATUS.QUICK_START} ref={popUpRef1}>
@@ -148,12 +305,12 @@ const Games = () => {
 
         <QuickStartWrapper>
           <QuickStartGameWrapper all={true} onClick={() => onQuickMatch('ALL')}>
-            <CreateRoomGameImage src={require('assets/images/All01.jpg')} alt="gameImage" />
+            <CreateRoomGameImage src={require('assets/images/game_image/all.jpg')} alt="gameImage" />
             <QuickStartGameText>ALL</QuickStartGameText>
           </QuickStartGameWrapper>
           {gameData.map((x, idx) => (
             <CreateRoomGameWrapper key={idx} onClick={() => onQuickMatch(x.name)}>
-              <CreateRoomGameImage src={x.src} alt="gameImage" />
+              <CreateRoomGameImage src={x.image} alt="gameImage" />
               <QuickStartGameText>{x.name}</QuickStartGameText>
             </CreateRoomGameWrapper>
           ))}
@@ -191,7 +348,7 @@ const Games = () => {
                   setRoomInfo({ ...roomInfo, game: idx, maxPeople: x.defaultPlayer });
                 }}
               >
-                <CreateRoomGameImage src={x.src} alt="gameImage" />
+                <CreateRoomGameImage src={x.image} alt="gameImage" />
                 <CreateRoomGameText selected={roomInfo.game === idx}>{x.name}</CreateRoomGameText>
               </CreateRoomGameWrapper>
             ))}
@@ -368,7 +525,7 @@ const ChattingWrapper = styled.div`
   padding: 10px;
   @media all and (max-width: 1150px) {
     width: 100%;
-    min-height: 400px;
+    height: 360px;
     margin-top: 10px;
   }
 `;
@@ -658,6 +815,94 @@ const QuickStartGameText = styled.div`
   }
 `;
 
+const ChattingInfoWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  height: 36px;
+  font-size: 26px;
+  font-family: 'Lato', sans-serif;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #00000020;
+`;
+const ChattingTitle = styled.div`
+  width: 100%;
+`;
+const ChattingInfo = styled.div`
+  display: flex;
+  svg {
+    width: 26px;
+    height: 26px;
+    margin-right: 5px;
+  }
+`;
+const ChattingLogWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  max-height: 494px;
+  padding-top: 15px;
+  overflow-y: auto;
+  @media all and (max-width: 1150px) {
+    max-height: 254px;
+  }
+`;
+const ChattingInputWrapper = styled.div`
+  width: 100%;
+  margin-top: 10px;
+  height: 40px;
+  display: flex;
+`;
+const InputWrapper = styled.input`
+  width: calc(100% - 45px);
+  height: 100%;
+  border: 0;
+  border-radius: 5px;
+  background-color: #ffffff;
+  padding: 0 10px;
+  font-size: 16px;
+`;
+const InputWriteButton = styled.div`
+  width: 40px;
+  height: 100%;
+  margin-left: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #7c7c7c;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s linear;
+  svg {
+    color: white;
+    width: 20px;
+    height: 20px;
+  }
+  &:hover {
+    background-color: #525252;
+  }
+`;
+const ChatWrapper = styled.div`
+  display: flex;
+  margin-bottom: 15px;
+  font-size: 17px;
+  font-family: NanumSquareR;
+`;
+const ChatImage = styled.img`
+  width: 45px;
+  height: 45px;
+  background-color: white;
+  border-radius: 45px;
+  margin-right: 5px;
+`;
+const ChatContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+const ChatNickname = styled.div`
+  font-weight: 600;
+  margin-top: 4px;
+  margin-bottom: 5px;
+`;
+
 const RoomWrapper = styled.div`
   width: 100%;
   height: 279px;
@@ -736,34 +981,34 @@ const People = styled.div`
   align-items: center;
 `;
 
-const ChatWrapper = styled.div`
-  width: 100%;
-  height: 140px;
-  display: flex;
-  flex-direction: column;
-  background-color: #cdcdcd8f;
-  border-radius: 5px;
-  padding: 5px 5px 2px 5px;
-`;
-const Messages = styled.div`
-  height: 109px;
-  padding-bottom: 3px;
-  overflow: auto;
-  &::-webkit-scrollbar {
-    width: 10px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: black;
-    border-radius: 10px;
-    background-clip: padding-box;
-    border: 2px solid transparent;
-  }
-  &::-webkit-scrollbar-track {
-    background-color: grey;
-    border-radius: 10px;
-    box-shadow: inset 0px 0px 5px white;
-  }
-`;
+// const ChatWrapper = styled.div`
+//   width: 100%;
+//   height: 140px;
+//   display: flex;
+//   flex-direction: column;
+//   background-color: #cdcdcd8f;
+//   border-radius: 5px;
+//   padding: 5px 5px 2px 5px;
+// `;
+// const Messages = styled.div`
+//   height: 109px;
+//   padding-bottom: 3px;
+//   overflow: auto;
+//   &::-webkit-scrollbar {
+//     width: 10px;
+//   }
+//   &::-webkit-scrollbar-thumb {
+//     background-color: black;
+//     border-radius: 10px;
+//     background-clip: padding-box;
+//     border: 2px solid transparent;
+//   }
+//   &::-webkit-scrollbar-track {
+//     background-color: grey;
+//     border-radius: 10px;
+//     box-shadow: inset 0px 0px 5px white;
+//   }
+// `;
 const MessageInputWrapper = styled.form`
   height: 27px;
   display: flex;

@@ -1,5 +1,11 @@
 import client from './client';
 
+export const getRanking = page => client.get(`account/ranking?page=${page}`);
+export const getRecord = (page, username) => {
+  if (username) return client.get(`match_record?page=${page}&username=${username}`);
+  else return client.get(`account/record?page=${page}`);
+};
+
 export const signup = payload => client.post('auth/signup', payload);
 export const login = payload => client.post('auth/login', payload);
 export const check = () => client.get('auth/check');

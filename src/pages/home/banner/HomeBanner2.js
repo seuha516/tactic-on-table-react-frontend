@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const HomeBanner2 = () => {
   return (
     <Wrapper>
-      <img src={require('assets/images/Photo2_1.jpg')} alt="Banner2" />
+      <img src={require('assets/images/home/banner/chess.jpg')} alt="Banner2" />
       <Text>
         <Link to="/games/chess">
           <div>Play</div>

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const HomeBanner1 = () => {
   return (
     <Wrapper>
-      <img src={require('assets/images/Photo1_1.jpg')} alt="Banner1" />
+      <img src={require('assets/images/home/banner/main.jpg')} alt="Banner1" />
       <Text>
         Think it,
         <br />

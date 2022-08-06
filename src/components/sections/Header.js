@@ -54,7 +54,7 @@ export const Header = () => {
           {user ? (
             <>
               <div>
-                <img src={require('assets/images/Profile_blank.png')} alt="Profile" />
+                <img src={process.env.REACT_APP_API_IMAGE + 'profile_default.png'} alt="Profile" />
               </div>
               <div>{user.username}</div>
             </>
@@ -79,9 +79,13 @@ export const Header = () => {
 
       <Wrapper>
         <Title>
-          <Navbar src={require('assets/images/Navbar_icon.png')} alt="Navbar" onClick={() => setOpen(!open)} />
+          <Navbar
+            src={require('assets/images/home/header/navbar_icon.png')}
+            alt="Navbar"
+            onClick={() => setOpen(!open)}
+          />
           <TitleTextWrapper to="/">
-            <Icon src={require('assets/images/TOT_icon_white.png')} alt="Icon" />
+            <Icon src={require('assets/images/home/header/tot_white_icon.png')} alt="Icon" />
             <TitleText>Tactic On Table</TitleText>
           </TitleTextWrapper>
         </Title>
@@ -96,7 +100,7 @@ export const Header = () => {
 
         {!user ? (
           <ProfileWrapper>
-            <ProfileImage src={require('assets/images/Profile_blank.png')} alt="Profile" />
+            <ProfileImage src={process.env.REACT_APP_API_IMAGE + 'profile_default.png'} alt="Profile" />
             <ProfileName length={getLength('네에에4123424.1', '18px', 'Noto Sans KR')}>네에에4123424.1</ProfileName>
           </ProfileWrapper>
         ) : (
