@@ -5,7 +5,7 @@ import styled from 'styled-components';
 const HomeBanner3 = () => {
   return (
     <Wrapper>
-      <img src={require('assets/images/home/banner/etc.jpg')} alt="Banner3" />
+      <img src={require('assets/images/home/banner/etc.jpg')} alt="etcBanner" />
       <Text>
         <Link to="/information">
           <div>More</div>
@@ -25,22 +25,24 @@ const Wrapper = styled.div`
     height: 250px;
     object-fit: cover;
   }
-  @media all and (max-width: 420px) {
-    .photo .text {
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-  }
 `;
 const Text = styled.div`
   position: absolute;
   color: rgba(255, 255, 255, 1);
   font-size: 40px;
   font-family: 'Russo One', sans-serif;
-  text-shadow: 5px 5px 3px rgb(0, 0, 0);
+  text-shadow: 5px 5px 3px #363636;
   text-align: right;
   top: 50%;
   left: 100%;
   transform: translate(-125%, -50%);
   cursor: pointer;
+  transition: text-shadow 0.2s linear;
+  &:hover {
+    text-shadow: 5px 5px 3px #000000;
+  }
+  @media all and (max-width: 375px) {
+    font-size: 36px;
+    transform: translate(-115%, -50%);
+  }
 `;

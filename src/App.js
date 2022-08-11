@@ -1,16 +1,24 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import styled, { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
 import reset from 'styled-reset';
+
+import { addMessage, changeField as changeChatField } from 'modules/chats';
 
 import NanumSquareR from 'assets/fonts/NanumSquareR.ttf';
 
-import Header from './components/sections/Header';
-import Home from './pages/home/Home';
-import Games from './pages/home/Games';
-import MatchRecord from './pages/home/MatchRecord';
-import Ranking from './pages/home/Ranking';
+import Header from 'pages/main/sections/Header';
+import Footer from 'pages/main/sections/Footer';
+import Home from 'pages/main/Home';
+import Games from 'pages/main/Games';
+import Room from 'pages/games/Room';
+import MatchRecord from 'pages/main/MatchRecord';
+import Ranking from 'pages/main/Ranking';
+import Information from 'pages/main/Information';
+import Signup from 'pages/main/user/Signup';
+import Login from 'pages/main/user/Login';
+import UserPage from 'pages/main/user/UserPage';
 
 const GlobalStyles = createGlobalStyle`
   ${reset}
@@ -20,10 +28,7 @@ const GlobalStyles = createGlobalStyle`
     box-sizing: inherit;
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    img {
-      -webkit-user-drag: none;
-    }
-    a {
+    img, a {
       -webkit-user-drag: none;
     }
     select {
@@ -33,10 +38,10 @@ const GlobalStyles = createGlobalStyle`
       -khtml-user-select: none;
       user-select: none;
     }
-    strong{
+    strong {
       font-weight: bold;
     }
-    em{
+    em {
       font-style: italic;
     }
     &::-webkit-scrollbar {
@@ -55,27 +60,56 @@ const GlobalStyles = createGlobalStyle`
     }
   }
   html {
-    height: 100%;
+    overflow-x: hidden;
   }
   body {
     box-sizing: border-box;
-    min-height: 100%;
     line-height: 1;
-  }
-  #root {
-    min-height: 100%;
   }
   a {
     color: inherit;
     text-decoration: none;
   }
-  @font-face { // 깔끔한 한글 폰트
+  @font-face {
     font-family: NanumSquareR;
     src: url(${NanumSquareR}) format("truetype");
   }
 `;
 
 function App() {
+  const dispatch = useDispatch();
+
+  let ws = useRef(null);
+
+  useEffect(() => {
+    if (!ws.current) {
+      ws.current = new WebSocket(`ws://localhost:8000/ws/chat/lobby/`);
+      ws.current.onopen = () => {
+        console.log('Lobby - CONNECTED');
+      };
+      ws.current.onclose = () => {
+        console.log('Lobby - DISCONNECTED');
+      };
+      ws.current.onerror = error => {
+        console.log('Lobby - CONNECTION ERROR');
+        console.log(error);
+      };
+      ws.current.onmessage = e => {
+        const data = JSON.parse(e.data);
+        if (data.type === 'chat') {
+          dispatch(addMessage({ key: 'chat', value: data.value }));
+        } else if (data.type === 'game') {
+          dispatch(addMessage({ key: 'game', value: data.value }));
+        }
+      };
+      dispatch(changeChatField({ key: 'socket', value: ws.current }));
+    }
+    return () => {
+      console.log('Lobby - CLOSE');
+      ws.current.close();
+    };
+  }, []);
+
   return (
     <>
       <GlobalStyles />
@@ -84,82 +118,18 @@ function App() {
         <Routes>
           <Route path="" element={<Home />} />
           <Route path="games" element={<Games />} />
+          <Route path="games/:roomId" element={<Room />} />
           <Route path="match_record" element={<MatchRecord />} />
           <Route path="ranking" element={<Ranking />} />
+          <Route path="information" element={<Information />} />
+          <Route path="signup" element={<Signup />} />
+          <Route path="login" element={<Login />} />
+          <Route path="user/:username" element={<UserPage />} />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </>
   );
 }
 
 export default App;
-
-// const InsideComponent = () => {
-//   const dispatch = useDispatch();
-//   const location = useLocation();
-
-//   // const { notice, user } = useSelector(state => ({
-//   //   notice: state.notices,
-//   //   user: state.users.user,
-//   // }));
-
-//   // useEffect(() => {
-//   //   if (user) {
-//   //     dispatch(noticeRead());
-//   //     dispatch(changeField({ key: 'remove', value: null }));
-//   //   }
-//   // }, []);
-
-//   return (
-//     <Routes>
-//       {/* <Route path="login" element={<Login />} />
-//       <Route path="login/:social" element={<Login />} />
-//       <Route path="signup" element={<SignUp />} />
-//       <Route path="pwd_find" element={<PwdFind />} /> */}
-//       <Route
-//         path="*"
-//         element={
-//           <Wrapper>
-//             {/* <Sidebar /> */}
-//             <ContentWrapper>
-//               {/* <Header />
-//               <Routes>
-//                 <Route path="" element={<Main />} />
-//                 <Route path="posts/*">
-//                   <Route path="" element={<List />} />
-//                   <Route path="write" element={<Write />} />
-//                   <Route path=":id" element={<Read />} />
-//                 </Route>
-//                 <Route path="mypage/:nickname" element={<Mypage />} />
-//                 <Route path="pwd_change" element={<PwdChange />} />
-//                 <Route path="signout" element={<SignOut />} />
-//                 <Route path="message/*" element={<Message />} />
-//                 <Route path="notification" element={<Notification />} />
-//                 <Route path="*" element={<NotFound />} />
-//               </Routes>
-//               <Footer /> */}
-//             </ContentWrapper>
-//           </Wrapper>
-//         }
-//       />
-//     </Routes>
-//   );
-// };
-
-// const Wrapper = styled.div`
-//   background-color: #f1f1f1;
-//   width: min(100%, 1500px);
-//   height: 100%;
-//   min-height: 100vh;
-//   margin-left: max(0px, calc(50% - 750px));
-//   display: flex;
-//   overflow-x: hidden;
-// `;
-// const ContentWrapper = styled.div`
-//   width: 100%;
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-//   transition: all 0.5s linear;
-//   overflow: hidden;
-// `;
