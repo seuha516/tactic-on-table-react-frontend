@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
-const UserIcon = ({ username, nickname, image, size, winner }) => {
+const UserIcon = ({ user, size, winner }) => {
   const [tagVisible, setTagVisible] = useState(false);
   const nicknameRef = useRef(null);
 
@@ -17,18 +17,35 @@ const UserIcon = ({ username, nickname, image, size, winner }) => {
     };
   }, []);
 
-  return (
-    <Wrapper to={`/user/${username}`} style={{ width: size, height: size }}>
-      <ProfileImage src={process.env.REACT_APP_API_IMAGE + image} winner={winner} />
-      {tagVisible && <ProfileNickname>{nickname}</ProfileNickname>}
-      <FakeBarrier ref={nicknameRef} />
-    </Wrapper>
-  );
+  if (user) {
+    return (
+      <Wrapper to={`/user/${user.username}`} style={{ width: size, height: size }}>
+        <ProfileImage src={process.env.REACT_APP_API_IMAGE + user.image} winner={winner} />
+        {tagVisible && <ProfileNickname>{user.nickname}</ProfileNickname>}
+        <FakeBarrier ref={nicknameRef} />
+      </Wrapper>
+    );
+  } else {
+    return (
+      <WrapperDiv style={{ width: size, height: size }}>
+        <ProfileImage
+          src={process.env.REACT_APP_API_IMAGE + 'profile_default.png'}
+          winner={winner}
+        />
+        {tagVisible && <ProfileNickname>탈퇴한 유저</ProfileNickname>}
+        <FakeBarrier ref={nicknameRef} />
+      </WrapperDiv>
+    );
+  }
 };
 
 export default UserIcon;
 
 const Wrapper = styled(Link)`
+  position: relative;
+  margin: 1px;
+`;
+const WrapperDiv = styled.div`
   position: relative;
   margin: 1px;
 `;

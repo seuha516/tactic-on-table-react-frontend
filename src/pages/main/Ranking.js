@@ -5,7 +5,7 @@ import qs from 'qs';
 import styled from 'styled-components';
 
 import { GAME_LIST } from 'lib/data/gameData';
-import { changeField, getRanking } from 'modules/users';
+import { changeUserField, getRanking } from 'modules/users';
 
 import { Loading } from 'components/common/Loading';
 import { RankingTitle } from 'components/common/Title';
@@ -21,9 +21,12 @@ const MatchRecord = () => {
   const nowPage = parseInt(page || '1');
 
   useEffect(() => {
+    const htmlTitle = document.querySelector('title');
+    htmlTitle.innerHTML = 'Tactic On Table - Ranking';
     dispatch(getRanking(nowPage));
     return () => {
-      dispatch(changeField({ key: 'ranking', value: null }));
+      htmlTitle.innerHTML = 'Tactic On Table';
+      dispatch(changeUserField({ key: 'ranking', value: null }));
     };
   }, [dispatch, nowPage]);
 

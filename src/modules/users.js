@@ -1,7 +1,8 @@
 import { createAction, handleActions } from 'redux-actions';
-import { call, takeLatest } from 'redux-saga/effects';
+import { call, put, takeLatest } from 'redux-saga/effects';
 import createRequestSaga, { createRequestActionTypes } from 'lib/createRequestSaga';
 import * as usersAPI from 'lib/api/users';
+import { getAnonymous } from 'lib/utils/getRandom';
 
 const CHANGE_FIELD = 'users/CHANGE_FIELD';
 const [SIGNUP, SIGNUP_SUCCESS, SIGNUP_FAILURE] = createRequestActionTypes('users/SIGNUP');
@@ -16,23 +17,24 @@ const [GET_RECORD, GET_RECORD_SUCCESS, GET_RECORD_FAILURE] =
 const [GET_RANKING, GET_RANKING_SUCCESS, GET_RANKING_FAILURE] =
   createRequestActionTypes('users/GET_RANKING');
 
-export const changeField = createAction(CHANGE_FIELD);
+export const changeUserField = createAction(CHANGE_FIELD);
 export const signup = createAction(SIGNUP);
 export const login = createAction(LOGIN);
 export const check = createAction(CHECK);
 export const logout = createAction(LOGOUT);
-export const read = createAction(READ);
-export const update = createAction(UPDATE);
-export const remove = createAction(REMOVE);
+export const readUser = createAction(READ);
+export const updateUser = createAction(UPDATE);
+export const removeUser = createAction(REMOVE);
 export const getRecord = createAction(GET_RECORD);
 export const getRanking = createAction(GET_RANKING);
 
 const signupSaga = createRequestSaga(SIGNUP, usersAPI.signup);
 const loginSaga = createRequestSaga(LOGIN, usersAPI.login);
 const checkSaga = createRequestSaga(CHECK, usersAPI.check);
-function checkFailureSaga() {
+function* checkFailureSaga() {
   try {
     localStorage.removeItem('user');
+    yield put({ type: 'chats/CHANGE_FIELD', payload: { key: 'me', value: getAnonymous() } });
   } catch (e) {
     console.log('localStorage is not working');
   }
@@ -41,6 +43,7 @@ function* logoutSaga() {
   try {
     yield call(usersAPI.logout);
     localStorage.removeItem('user');
+    yield put({ type: 'chats/CHANGE_FIELD', payload: { key: 'me', value: getAnonymous() } });
   } catch (e) {
     console.log(e);
   }

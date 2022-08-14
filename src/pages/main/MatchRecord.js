@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import qs from 'qs';
 import styled from 'styled-components';
 
-import { changeField, getRecord } from 'modules/users';
+import { changeUserField, getRecord } from 'modules/users';
 
 import { Loading } from 'components/common/Loading';
 import { MatchRecordTitle } from 'components/common/Title';
@@ -20,9 +20,12 @@ const MatchRecord = () => {
   const nowPage = parseInt(page || '1');
 
   useEffect(() => {
+    const htmlTitle = document.querySelector('title');
+    htmlTitle.innerHTML = 'Tactic On Table - Record';
     dispatch(getRecord(nowPage));
     return () => {
-      dispatch(changeField({ key: 'record', value: null }));
+      htmlTitle.innerHTML = 'Tactic On Table';
+      dispatch(changeUserField({ key: 'record', value: null }));
     };
   }, [dispatch, nowPage]);
 

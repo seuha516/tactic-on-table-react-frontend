@@ -110,6 +110,10 @@ export const getEditProfileInitialState = user => {
     },
   };
 };
+export const loginReducer = (state, action) => ({
+  ...state,
+  [action.name]: action.value.replace(/ /g, ''),
+});
 export const accountReducer = (state, action) => {
   const actionName = action.name;
   let newValue = action.value ? action.value.replace(/ /g, '') : '';
@@ -310,8 +314,4 @@ export const checkSignOutCondition = state => {
     return false;
   }
   return true;
-};
-export const makeChatMe = user => {
-  const { username, nickname, image } = user;
-  return { username, nickname, image };
 };

@@ -3,16 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { checkLoginCondition, makeChatMe } from 'lib/data/accountData';
+import { loginReducer, checkLoginCondition } from 'lib/data/accountData';
 import { login } from 'modules/users';
-import { changeField as changeChatField } from 'modules/chats';
+import { changeChatField } from 'modules/chats';
 
 import { LoadingBox } from 'components/common/Loading';
-
-const reducer = (state, action) => ({
-  ...state,
-  [action.name]: action.value.replace(/ /g, ''),
-});
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,7 +17,7 @@ const Login = () => {
     user: users.user,
     loading: loading['users/LOGIN'],
   }));
-  const [state, stateDispatch] = useReducer(reducer, {
+  const [state, stateDispatch] = useReducer(loginReducer, {
     username: '',
     password: '',
   });
@@ -32,7 +27,7 @@ const Login = () => {
     htmlTitle.innerHTML = 'Tactic On Table - Login';
     if (user) {
       navigate('/');
-      dispatch(changeChatField({ key: 'me', value: makeChatMe(user) }));
+      dispatch(changeChatField({ key: 'me', value: user }));
       try {
         localStorage.setItem('user', JSON.stringify(user));
       } catch (e) {

@@ -1,15 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { AiOutlineReload, AiOutlineCloseCircle, AiOutlineWarning } from 'react-icons/ai';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { AiFillLock, AiOutlineCloseCircle, AiOutlineWarning } from 'react-icons/ai';
 import { BiFileFind, BiLogIn } from 'react-icons/bi';
+import { BsPeopleFill } from 'react-icons/bs';
 import { FiUserPlus } from 'react-icons/fi';
 import styled, { css } from 'styled-components';
 
 import { GAME_LIST } from 'lib/data/gameData';
+import { makeRoomMargin } from 'lib/utils/makeRoomMargin';
+import { changeRoomField, getRoomList, createRoom } from 'modules/rooms';
 
 import { LobbyTitle } from 'components/common/Title';
 import Chatting from 'components/chat/Chatting';
+import { LoadingBox } from 'components/common/Loading';
 
 const POPUP_STATUS = {
   NONE: 0,
@@ -20,17 +24,26 @@ const DEFAULT_ROOM_INFO = {
   name: '',
   password: '',
   game: -1,
-  maxPeople: 2,
+  maxPlayer: 2,
 };
 
 const Games = () => {
-  const { user, me } = useSelector(({ users, chats }) => ({ user: users.user, me: chats.me }));
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { user, me, roomList } = useSelector(({ users, chats, rooms }) => ({
+    user: users.user,
+    me: chats.me,
+    roomList: rooms.list,
+  }));
   const [popUp, setPopUp] = useState(POPUP_STATUS.NONE);
   const [roomInfo, setRoomInfo] = useState(DEFAULT_ROOM_INFO);
   const popUpRef1 = useRef(null);
   const popUpRef2 = useRef(null);
 
   useEffect(() => {
+    const htmlTitle = document.querySelector('title');
+    htmlTitle.innerHTML = 'Tactic On Table - Lobby';
     function handleClickOutside(e) {
       if (
         popUpRef1.current &&
@@ -41,17 +54,20 @@ const Games = () => {
         setPopUp(POPUP_STATUS.NONE);
       }
     }
+    dispatch(getRoomList());
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
+      htmlTitle.innerHTML = 'Tactic On Table';
+      dispatch(changeRoomField({ key: 'list', value: null }));
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [dispatch]);
 
   const onQuickMatch = game => {
     alert(`${game}를 선택했습니다.`);
   };
   const onCreateRoom = () => {
-    alert(JSON.stringify(roomInfo));
+    dispatch(createRoom(roomInfo));
   };
 
   return (
@@ -85,10 +101,19 @@ const Games = () => {
               <div>방 만들기</div>
               <FiUserPlus />
             </CreateRoomButton>
-            <AiOutlineReload />
           </LobbyButtonWrapper>
           <LobbyRoomWrapper>
-            <Link to={`/games/${'124'}`}>dsd</Link>
+            {roomList ? (
+              roomList.length === 0 ? (
+                <NoDataText>No Room</NoDataText>
+              ) : (
+                roomList.map((roomItem, idx) => (
+                  <RoomItem key={roomItem.num} idx={idx} roomItem={roomItem} />
+                ))
+              )
+            ) : (
+              <LoadingBox r="70px" />
+            )}
           </LobbyRoomWrapper>
         </LobbyWrapper>
 
@@ -143,7 +168,7 @@ const Games = () => {
                   key={idx}
                   onClick={() => {
                     if (roomInfo.game === idx) return;
-                    setRoomInfo({ ...roomInfo, game: idx, maxPeople: x.defaultPlayer });
+                    setRoomInfo({ ...roomInfo, game: idx, maxPlayer: x.defaultPlayer });
                   }}
                 >
                   <CreateRoomGameImage src={x.image} alt="gameImage" />
@@ -158,8 +183,8 @@ const Games = () => {
                   {GAME_LIST[roomInfo.game].player.map(x => (
                     <Number
                       key={x}
-                      selected={x === roomInfo.maxPeople}
-                      onClick={() => setRoomInfo({ ...roomInfo, maxPeople: x })}
+                      selected={x === roomInfo.maxPlayer}
+                      onClick={() => setRoomInfo({ ...roomInfo, maxPlayer: x })}
                     >
                       {x}
                     </Number>
@@ -178,6 +203,32 @@ const Games = () => {
 };
 
 export default Games;
+
+const RoomItem = ({ roomItem, idx }) => {
+  const navigate = useNavigate();
+  return (
+    <RoomItemWrapper
+      color={roomItem.color}
+      status={roomItem.status}
+      idx={idx}
+      onClick={() => {
+        navigate(`/games/${roomItem.code}`);
+      }}
+    >
+      <RoomImage src={GAME_LIST[roomItem.game].icon} alt="icon" />
+      <RoomDataWrapper>
+        <RoomTitle>{roomItem.name}</RoomTitle>
+        <RoomInfo>
+          <LockIcon lock={roomItem.lock ? 'true' : 'false'} />
+          <People>
+            <BsPeopleFill />
+            {`${roomItem.players} / ${roomItem.maxPlayer}`}
+          </People>
+        </RoomInfo>
+      </RoomDataWrapper>
+    </RoomItemWrapper>
+  );
+};
 
 const Wrapper = styled.div`
   background-color: whitesmoke;
@@ -257,7 +308,6 @@ const ContentWrapper = styled.div`
   margin-top: 55px;
   width: 100%;
   max-width: 1500px;
-  height: 100%;
   min-height: 600px;
   display: flex;
   animation: appear 0.5s ease-out;
@@ -276,18 +326,18 @@ const ContentWrapper = styled.div`
   }
 `;
 const LobbyWrapper = styled.div`
-  background-color: #bbbbbbab;
-  width: 70%;
-  border-radius: 15px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
+  width: 70%;
+  min-height: 600px;
+  border-radius: 15px;
   margin-right: 10px;
   padding: 10px;
+  background-color: #cbcbcb;
   @media all and (max-width: 1150px) {
     width: 100%;
-    min-height: 600px;
     margin-right: 0;
   }
 `;
@@ -314,9 +364,24 @@ const LobbyButtonWrapper = styled.div`
   }
 `;
 const LobbyRoomWrapper = styled.div`
-  background-color: aliceblue;
   width: 100%;
-  height: 300px;
+  max-height: 525px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  border-top: 1px solid #848484;
+  padding-top: 5px;
+`;
+const NoDataText = styled.div`
+  width: 100%;
+  height: 510px;
+  text-align: center;
+  font-size: 36px;
+  font-family: 'Raleway', sans-serif;
+  color: #646464;
+  padding-top: 244.5px;
 `;
 const FastMatchButton = styled.div`
   width: 35%;
@@ -389,7 +454,7 @@ const CreateRoomButton = styled.div`
   }
 `;
 const ChattingWrapper = styled.div`
-  width: 30%;
+  width: calc(30% - 10px);
   @media all and (max-width: 1150px) {
     width: 100%;
     height: 360px;
@@ -588,4 +653,75 @@ const CreateButton = styled.div`
   &:hover {
     background-color: #284051;
   }
+`;
+
+const RoomItemWrapper = styled.div`
+  background-color: ${props => props.color};
+  width: 31.5%;
+  max-width: 300px;
+  height: 80px;
+  padding: 6px 8px;
+  border-radius: 3px;
+  box-shadow: 1px 1px 1px 1px #00000046;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: box-shadow 0.15s linear;
+  margin: ${props => makeRoomMargin(3, props.idx)};
+  &:hover {
+    box-shadow: 1px 1px 1px 1px #000000;
+  }
+  @media all and (max-width: 880px) {
+    width: 47%;
+    margin: ${props => makeRoomMargin(2, props.idx)};
+  }
+  @media all and (max-width: 620px) {
+    width: 92%;
+    margin: ${props => makeRoomMargin(1, props.idx)};
+    max-width: 350px;
+  }
+`;
+const RoomImage = styled.img`
+  width: 50px;
+  height: 50px;
+  margin-right: 5px;
+`;
+const RoomDataWrapper = styled.div`
+  width: calc(100% - 55px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+const RoomTitle = styled.div`
+  font-size: 20px;
+  font-family: 'Nanum Gothic', sans-serif;
+  line-height: 22px;
+  max-height: 44px;
+  overflow-y: hidden;
+`;
+const RoomInfo = styled.div`
+  height: 20.8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  svg {
+    width: 18px;
+    height: 18px;
+    margin: 0 5px -2px 0;
+  }
+`;
+const LockIcon = styled(AiFillLock)`
+  ${props =>
+    props.lock === 'false' &&
+    css`
+      visibility: hidden;
+    `}
+`;
+const People = styled.div`
+  font-size: 16px;
+  font-family: 'Noto Sans KR', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

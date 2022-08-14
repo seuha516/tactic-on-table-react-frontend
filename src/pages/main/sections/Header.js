@@ -4,9 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled, { css } from 'styled-components';
 
 import { getLength } from 'lib/utils/getLength';
-import { getAnonymous } from 'lib/utils/getRandom';
 import { logout } from 'modules/users';
-import { changeField as changeChatField } from 'modules/chats';
 
 const CATEGORY_ITEMS = [
   {
@@ -86,7 +84,6 @@ export const Header = () => {
   const onLogout = () => {
     if (window.confirm('정말 로그아웃하시겠습니까?')) {
       dispatch(logout());
-      dispatch(changeChatField({ key: 'me', value: getAnonymous() }));
       navigate('/');
     }
   };

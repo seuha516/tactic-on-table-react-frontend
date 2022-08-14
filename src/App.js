@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { createGlobalStyle } from 'styled-components';
 import reset from 'styled-reset';
 
-import { addMessage, changeField as changeChatField } from 'modules/chats';
+import { addMessage, changeChatField } from 'modules/chats';
 
 import NanumSquareR from 'assets/fonts/NanumSquareR.ttf';
 
@@ -80,12 +80,12 @@ function App() {
   const dispatch = useDispatch();
 
   let ws = useRef(null);
-
   useEffect(() => {
     if (!ws.current) {
       ws.current = new WebSocket(`ws://localhost:8000/ws/chat/lobby/`);
       ws.current.onopen = () => {
         console.log('Lobby - CONNECTED');
+        dispatch(changeChatField({ key: 'socket', value: ws.current }));
       };
       ws.current.onclose = () => {
         console.log('Lobby - DISCONNECTED');
@@ -102,13 +102,12 @@ function App() {
           dispatch(addMessage({ key: 'game', value: data.value }));
         }
       };
-      dispatch(changeChatField({ key: 'socket', value: ws.current }));
     }
     return () => {
       console.log('Lobby - CLOSE');
       ws.current.close();
     };
-  }, []);
+  }, [dispatch]);
 
   return (
     <>
@@ -118,7 +117,7 @@ function App() {
         <Routes>
           <Route path="" element={<Home />} />
           <Route path="games" element={<Games />} />
-          <Route path="games/:roomId" element={<Room />} />
+          <Route path="games/:code" element={<Room />} />
           <Route path="match_record" element={<MatchRecord />} />
           <Route path="ranking" element={<Ranking />} />
           <Route path="information" element={<Information />} />

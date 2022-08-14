@@ -8,10 +8,9 @@ import {
   SIGNUP_INITIAL_STATE,
   accountReducer,
   checkSignUpCondition,
-  makeChatMe,
 } from 'lib/data/accountData';
 import { signup } from 'modules/users';
-import { changeField as changeChatField } from 'modules/chats';
+import { changeChatField } from 'modules/chats';
 
 import { LoadingBox } from 'components/common/Loading';
 
@@ -30,7 +29,7 @@ const Signup = () => {
     htmlTitle.innerHTML = 'Tactic On Table - Signup';
     if (user) {
       navigate('/');
-      dispatch(changeChatField({ key: 'me', value: makeChatMe(user) }));
+      dispatch(changeChatField({ key: 'me', value: user }));
       try {
         localStorage.setItem('user', JSON.stringify(user));
       } catch (e) {

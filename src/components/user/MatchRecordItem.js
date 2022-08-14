@@ -8,7 +8,6 @@ import UserIcon from 'components/user/UserIcon';
 import MatchResult from 'components/user/MatchResult';
 
 const MatchRecordItem = ({ record }) => {
-  if (!record) console.log(record);
   return (
     <Wrapper>
       <GameWrapper>
@@ -18,13 +17,7 @@ const MatchRecordItem = ({ record }) => {
       <DateWrapper1>{calcTime(record.date)}</DateWrapper1>
       <PlayerListWrapper>
         {record.players.map(recordPlayer => (
-          <UserIcon
-            key={recordPlayer.username}
-            username={recordPlayer.username}
-            nickname={recordPlayer.nickname}
-            image={recordPlayer.image}
-            size="40px"
-          />
+          <UserIcon key={recordPlayer.username} user={recordPlayer} size="40px" />
         ))}
       </PlayerListWrapper>
       <MatchResult result={record.result} />

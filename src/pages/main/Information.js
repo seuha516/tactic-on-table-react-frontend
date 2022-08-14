@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
 const Information = () => {
+  useEffect(() => {
+    const htmlTitle = document.querySelector('title');
+    htmlTitle.innerHTML = 'Tactic On Table - Info';
+    return () => {
+      htmlTitle.innerHTML = 'Tactic On Table';
+    };
+  }, []);
+
   return (
     <Wrapper>
       <TitleWrapper>

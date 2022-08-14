@@ -13,10 +13,9 @@ import {
   accountReducer,
   checkEditProfileCondition,
   checkSignOutCondition,
-  makeChatMe,
 } from 'lib/data/accountData';
-import { changeField, read, update, remove, logout } from 'modules/users';
-import { changeField as changeChatField } from 'modules/chats';
+import { changeUserField, readUser, updateUser, removeUser, logout } from 'modules/users';
+import { changeChatField } from 'modules/chats';
 
 import NotFound from 'components/common/NotFound';
 import Error from 'components/common/Error';
@@ -47,43 +46,43 @@ const UserPage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     setRecordPage(1);
-    stateDispatch({ name: 'init', state: getEditProfileInitialState(user) });
+    stateDispatch({
+      name: 'init',
+      state: getEditProfileInitialState({ ...user, email: userData ? userData.email : '' }),
+    });
     if ((!user || user.username !== username) && userPage !== USER_PAGE_STATUS.PROFILE) {
       setUserPage(USER_PAGE_STATUS.PROFILE);
     }
-  }, [user, username, userPage]);
-  useEffect(() => {
-    dispatch(read(username));
-    return () => {
-      dispatch(changeField({ key: 'read', value: { data: null, error: null } }));
-      dispatch(changeField({ key: 'update', value: false }));
-      dispatch(changeField({ key: 'remove', value: false }));
-    };
-  }, [dispatch, username]);
+  }, [user, username, userPage, userData]);
   useEffect(() => {
     const htmlTitle = document.querySelector('title');
     htmlTitle.innerHTML = `Tactic On Table - ${username}`;
+    dispatch(readUser(username));
+    return () => {
+      htmlTitle.innerHTML = 'Tactic On Table';
+      dispatch(changeUserField({ key: 'read', value: { data: null, error: null } }));
+      dispatch(changeUserField({ key: 'update', value: false }));
+      dispatch(changeUserField({ key: 'remove', value: false }));
+    };
+  }, [dispatch, username]);
+  useEffect(() => {
     if (updateValue) {
-      dispatch(read(username));
-      dispatch(changeChatField({ key: 'me', value: makeChatMe(user) }));
+      dispatch(readUser(username));
+      dispatch(changeChatField({ key: 'me', value: user }));
       setUserPage(USER_PAGE_STATUS.PROFILE);
       try {
         localStorage.setItem('user', JSON.stringify(user));
       } catch (e) {
         console.log('localStorage is not working');
       }
-      dispatch(changeField({ key: 'update', value: false }));
+      dispatch(changeUserField({ key: 'update', value: false }));
     }
     if (removeValue) {
-      console.log('ㅇㅇ');
       navigate('/');
       dispatch(logout());
-      dispatch(changeField({ key: 'remove', value: false }));
+      dispatch(changeUserField({ key: 'remove', value: false }));
     }
-    return () => {
-      htmlTitle.innerHTML = 'Tactic On Table';
-    };
-  }, [dispatch, navigate, removeValue, updateValue, user, username]);
+  }, [dispatch, navigate, updateValue, removeValue, user, username]);
 
   const onChange = e => stateDispatch(e.target);
   const onChangeProfileImage = async e => {
@@ -102,12 +101,12 @@ const UserPage = () => {
   const onEditProfile = () => {
     if (!checkEditProfileCondition(state)) return;
     const { originalPassword, password, email, nickname, image } = state;
-    dispatch(update({ username, originalPassword, password, email, nickname, image }));
+    dispatch(updateUser({ username, originalPassword, password, email, nickname, image }));
   };
   const onSignOut = () => {
     if (window.confirm('정말 회원탈퇴 하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       if (!checkSignOutCondition(state)) return;
-      dispatch(remove({ username, originalPassword: state.originalPassword }));
+      dispatch(removeUser({ username, originalPassword: state.originalPassword }));
     }
   };
 
@@ -130,7 +129,7 @@ const UserPage = () => {
               <UserInfoEmail>{userData.email}</UserInfoEmail>
               <UserTotalScore>
                 <UserTotalScoreText>Total Wins</UserTotalScoreText>
-                <UserTotalScoreValue>{userData.total_score}</UserTotalScoreValue>
+                <UserTotalScoreValue>{userData.totalScore}</UserTotalScoreValue>
               </UserTotalScore>
               <UserScoreWrapper>
                 {userData.score.slice(0, 4).map((x, idx) => (
@@ -148,16 +147,16 @@ const UserPage = () => {
             )}
             <SmallMatchRecordTitle />
             <MatchRecordWrapper>
-              {userData.user_record
-                .slice(recordPage * 10 - 10, Math.min(recordPage * 10, userData.user_record.length))
+              {userData.userRecord
+                .slice(recordPage * 10 - 10, Math.min(recordPage * 10, userData.userRecord.length))
                 .map(recordItem => (
                   <MatchRecordItem key={recordItem.num} record={recordItem} />
                 ))}
-              {userData.user_record.length === 0 && <NoDataText>No Data</NoDataText>}
+              {userData.userRecord.length === 0 && <NoDataText>No Data</NoDataText>}
             </MatchRecordWrapper>
             <PageControl
               nowPage={recordPage}
-              objCount={userData.user_record.length}
+              objCount={userData.userRecord.length}
               pageSize={10}
               url={null}
               setPage={setRecordPage}

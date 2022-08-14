@@ -7,34 +7,22 @@ const MatchResult = ({ result }) => {
   return (
     <ResultWrapper>
       {result.type === '1on1' ? (
-        result.winner ? (
+        result.winner !== null ? (
           <>
-            <ResultText type={'winner'}>Winner</ResultText>
-            <UserIcon
-              username={result.winner.username}
-              nickname={result.winner.nickname}
-              image={result.winner.image}
-              winner={true}
-              size="40px"
-            />
+            <ResultText type="winner">Winner</ResultText>
+            <UserIcon user={result.winner} winner={true} size="40px" />
           </>
         ) : (
-          <ResultText type={'draw'}>Draw</ResultText>
+          <ResultText type="draw">Draw</ResultText>
         )
       ) : result.type === 'multi' ? (
         <>
-          <ResultText type={'1st'}>1st</ResultText>
-          <UserIcon
-            username={result.winner.username}
-            nickname={result.winner.nickname}
-            image={result.winner.image}
-            winner={true}
-            size="40px"
-          />
+          <ResultText type="1st">1st</ResultText>
+          <UserIcon user={result.winner} winner={true} size="40px" />
         </>
       ) : (
         <>
-          <ResultText type={'canceled'}>Canceled</ResultText>
+          <ResultText type="canceled">Canceled</ResultText>
         </>
       )}
     </ResultWrapper>

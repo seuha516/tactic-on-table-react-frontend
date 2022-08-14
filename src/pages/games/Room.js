@@ -3,29 +3,42 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { addMessage, changeField as changeChatField } from 'modules/chats';
+import { changeChatField, addMessage } from 'modules/chats';
 
 import Chatting from 'components/chat/Chatting';
 
 const Room = () => {
   const dispatch = useDispatch();
 
-  const { roomId } = useParams();
-  const originalWs = useSelector(state => state.chats.socket);
+  const { code } = useParams();
+  const { init, originalWs, user } = useSelector(({ users, chats }) => ({
+    init: chats.init,
+    originalWs: chats.socket,
+    user: users.user,
+  }));
+
   let ws = useRef(null);
-
   useEffect(() => {
-    if (originalWs) originalWs.close();
+    if (!init) return;
+    else originalWs.close();
 
-    ws.current = new WebSocket(`ws://${process.env.REACT_APP_API_SOCKET_URL}/ws/chat/${roomId}/`);
+    ws.current = new WebSocket(`ws://${process.env.REACT_APP_API_SOCKET_URL}/ws/chat/${code}/`);
     ws.current.onopen = () => {
-      console.log(`${roomId} - CONNECTED`);
+      console.log(`${code} - CONNECTED`);
+      ws.current.send(
+        JSON.stringify({
+          type: 'tryJoinRoom',
+          data: {
+            code: code,
+          },
+        }),
+      );
     };
     ws.current.onclose = () => {
-      console.log(`${roomId} - DISCONNECTED`);
+      console.log(`${code} - DISCONNECTED`);
     };
     ws.current.onerror = error => {
-      console.log(`${roomId} - CONNECTION ERROR`);
+      console.log(`${code} - CONNECTION ERROR`);
       console.log(error);
     };
     ws.current.onmessage = e => {
@@ -39,7 +52,7 @@ const Room = () => {
     dispatch(changeChatField({ key: 'socket', value: ws.current }));
 
     return () => {
-      console.log(`${roomId} - CLOSE`);
+      console.log(`${code} - CLOSE`);
       ws.current.close();
 
       ws.current = new WebSocket(`ws://localhost:8000/ws/chat/lobby/`);
@@ -63,7 +76,7 @@ const Room = () => {
       };
       dispatch(changeChatField({ key: 'socket', value: ws.current }));
     };
-  }, []);
+  }, [init]);
 
   return (
     <Wrapper>

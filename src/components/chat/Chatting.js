@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { BsFillPencilFill } from 'react-icons/bs';
-import styled, { css } from 'styled-components';
-import ChatItem from './ChatItem';
+import styled from 'styled-components';
+
+import ChatItem from 'components/chat/ChatItem';
 
 const Chatting = () => {
   const { socket, me, chatLog } = useSelector(({ chats }) => ({
@@ -20,6 +21,11 @@ const Chatting = () => {
     scrollEnd();
   }, [chatLog]);
 
+  const scrollEnd = () => {
+    if (chatLogRef.current) {
+      chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
+    }
+  };
   const onSendMessage = () => {
     if (chatInput === '') return;
     socket.send(
@@ -33,11 +39,6 @@ const Chatting = () => {
       }),
     );
     setChatInput('');
-  };
-  const scrollEnd = () => {
-    if (chatLogRef.current) {
-      chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
-    }
   };
 
   return (
@@ -55,7 +56,7 @@ const Chatting = () => {
           onKeyPress={e => {
             if (e.key === 'Enter') onSendMessage();
           }}
-          placeholder="댓글을 입력하세요."
+          placeholder="채팅을 입력하세요."
         />
         <InputWriteButton onClick={onSendMessage}>
           <BsFillPencilFill />
