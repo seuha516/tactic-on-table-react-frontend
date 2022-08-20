@@ -32,3 +32,65 @@ export const GAME_LIST = [
     defaultPlayer: 2,
   },
 ];
+
+export const CHESS_PLAYER_COLOR = ['#ffffff', '#000000', '#e9e9e9'];
+export const CHESS_COLOR = {
+  WHITE: 0,
+  BLACK: 1,
+};
+export const CHESS_PIECE = {
+  PAWN: 0,
+  KNIGHT: 1,
+  BISHOP: 2,
+  ROOK: 3,
+  QUEEN: 4,
+  KING: 5,
+};
+export const CHESS_MOVE = {
+  NORMAL: 0,
+  CASTLING: 1,
+  PROMOTION: 2,
+  ENPASSANT: 3,
+};
+export const CHESS_PIECE_LIST = [
+  {
+    name: 'Pawn',
+    whiteImage: require('assets/images/game/chess/white_pawn.png'),
+    blackImage: require('assets/images/game/chess/black_pawn.png'),
+  },
+  {
+    name: 'Knight',
+    whiteImage: require('assets/images/game/chess/white_knight.png'),
+    blackImage: require('assets/images/game/chess/black_knight.png'),
+  },
+  {
+    name: 'Bishop',
+    whiteImage: require('assets/images/game/chess/white_bishop.png'),
+    blackImage: require('assets/images/game/chess/black_bishop.png'),
+  },
+  {
+    name: 'Rook',
+    whiteImage: require('assets/images/game/chess/white_rook.png'),
+    blackImage: require('assets/images/game/chess/black_rook.png'),
+  },
+  {
+    name: 'Queen',
+    whiteImage: require('assets/images/game/chess/white_queen.png'),
+    blackImage: require('assets/images/game/chess/black_queen.png'),
+  },
+  {
+    name: 'King',
+    whiteImage: require('assets/images/game/chess/white_king.png'),
+    blackImage: require('assets/images/game/chess/black_king.png'),
+  },
+];
+export const EMPTY_BOARD = [
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+];

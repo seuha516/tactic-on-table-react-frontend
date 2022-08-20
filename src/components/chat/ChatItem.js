@@ -8,8 +8,8 @@
 */
 
 import React from 'react';
-import styled from 'styled-components';
 import { AiOutlineInfoCircle, AiOutlineWarning, AiFillFlag } from 'react-icons/ai';
+import styled from 'styled-components';
 
 const COLOR = {
   JOIN: '#d9ffcb',
@@ -132,7 +132,7 @@ const MessageWrapper = styled.div`
   font-size: 16px;
   font-family: 'Noto Sans KR', sans-serif;
   line-height: 18px;
-  margin: 8px 20% 10px 0;
+  margin: 10px 20% 10px 0;
 `;
 const ChatImage = styled.img`
   width: 45px;

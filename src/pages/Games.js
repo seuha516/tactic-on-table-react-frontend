@@ -9,11 +9,11 @@ import styled, { css } from 'styled-components';
 
 import { GAME_LIST } from 'lib/data/gameData';
 import { makeRoomMargin } from 'lib/utils/makeRoomMargin';
-import { changeRoomField, getRoomList, createRoom } from 'modules/rooms';
+import { changeRoomField, getRoomList, createRoom, quickMatch } from 'modules/rooms';
 
 import { LobbyTitle } from 'components/common/Title';
-import Chatting from 'components/chat/Chatting';
 import { LoadingBox } from 'components/common/Loading';
+import Chatting from 'components/chat/Chatting';
 
 const POPUP_STATUS = {
   NONE: 0,
@@ -31,10 +31,11 @@ const Games = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { user, me, roomList } = useSelector(({ users, chats, rooms }) => ({
+  const { user, me, roomList, roomCode } = useSelector(({ users, chats, rooms }) => ({
     user: users.user,
     me: chats.me,
     roomList: rooms.list,
+    roomCode: rooms.create,
   }));
   const [popUp, setPopUp] = useState(POPUP_STATUS.NONE);
   const [roomInfo, setRoomInfo] = useState(DEFAULT_ROOM_INFO);
@@ -42,6 +43,7 @@ const Games = () => {
   const popUpRef2 = useRef(null);
 
   useEffect(() => {
+    dispatch(getRoomList());
     const htmlTitle = document.querySelector('title');
     htmlTitle.innerHTML = 'Tactic On Table - Lobby';
     function handleClickOutside(e) {
@@ -54,20 +56,38 @@ const Games = () => {
         setPopUp(POPUP_STATUS.NONE);
       }
     }
-    dispatch(getRoomList());
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      htmlTitle.innerHTML = 'Tactic On Table';
       dispatch(changeRoomField({ key: 'list', value: null }));
+      htmlTitle.innerHTML = 'Tactic On Table';
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dispatch]);
+  useEffect(() => {
+    if (roomCode) {
+      if (roomCode === 'X') {
+        alert('빠른 입장이 가능한 공개 방이 없습니다.');
+      } else {
+        navigate(`/games/${roomCode}`);
+      }
+      dispatch(changeRoomField({ key: 'create', value: null }));
+    }
+  }, [dispatch, navigate, roomCode]);
 
   const onQuickMatch = game => {
-    alert(`${game}를 선택했습니다.`);
+    dispatch(quickMatch(game));
   };
   const onCreateRoom = () => {
-    dispatch(createRoom(roomInfo));
+    if (roomInfo.name === '') {
+      alert('방 제목을 입력해야 합니다.');
+    } else if (roomInfo.name.length > 16) {
+      alert('방 제목은 16자 이하여야 합니다.');
+    } else if (roomInfo.game < 0) {
+      alert('게임을 선택해야 합니다.');
+    } else {
+      dispatch(changeRoomField({ key: 'password', value: roomInfo.password }));
+      dispatch(createRoom(roomInfo));
+    }
   };
 
   return (
@@ -102,6 +122,7 @@ const Games = () => {
               <FiUserPlus />
             </CreateRoomButton>
           </LobbyButtonWrapper>
+
           <LobbyRoomWrapper>
             {roomList ? (
               roomList.length === 0 ? (
@@ -112,7 +133,9 @@ const Games = () => {
                 ))
               )
             ) : (
-              <LoadingBox r="70px" />
+              <div style={{ width: '100%', height: '515px' }}>
+                <LoadingBox r="70px" />
+              </div>
             )}
           </LobbyRoomWrapper>
         </LobbyWrapper>
@@ -127,17 +150,17 @@ const Games = () => {
             <AiOutlineCloseCircle onClick={() => setPopUp(POPUP_STATUS.NONE)} />
           </CloseCreateRoomPopUp>
           <QuickStartWrapper>
-            <QuickStartGameWrapper all={true} onClick={() => onQuickMatch('ALL')}>
+            <QuickStartGameWrapper all={true} onClick={() => onQuickMatch(-1)}>
               <CreateRoomGameImage
                 src={require('assets/images/game_image/all.jpg')}
                 alt="gameImage"
               />
               <QuickStartGameText>ALL</QuickStartGameText>
             </QuickStartGameWrapper>
-            {GAME_LIST.map((x, idx) => (
-              <QuickStartGameWrapper key={idx} onClick={() => onQuickMatch(x.name)}>
-                <CreateRoomGameImage src={x.image} alt="gameImage" />
-                <QuickStartGameText>{x.name}</QuickStartGameText>
+            {GAME_LIST.map((gameItem, idx) => (
+              <QuickStartGameWrapper key={idx} onClick={() => onQuickMatch(idx)}>
+                <CreateRoomGameImage src={gameItem.image} alt="gameImage" />
+                <QuickStartGameText>{gameItem.name}</QuickStartGameText>
               </QuickStartGameWrapper>
             ))}
           </QuickStartWrapper>
@@ -163,16 +186,18 @@ const Games = () => {
             />
             <CreateRoomInputText>Game</CreateRoomInputText>
             <CreateRoomGameList>
-              {GAME_LIST.map((x, idx) => (
+              {GAME_LIST.map((gameItem, idx) => (
                 <CreateRoomGameWrapper
                   key={idx}
                   onClick={() => {
                     if (roomInfo.game === idx) return;
-                    setRoomInfo({ ...roomInfo, game: idx, maxPlayer: x.defaultPlayer });
+                    setRoomInfo({ ...roomInfo, game: idx, maxPlayer: gameItem.defaultPlayer });
                   }}
                 >
-                  <CreateRoomGameImage src={x.image} alt="gameImage" />
-                  <CreateRoomGameText selected={roomInfo.game === idx}>{x.name}</CreateRoomGameText>
+                  <CreateRoomGameImage src={gameItem.image} alt="gameImage" />
+                  <CreateRoomGameText selected={roomInfo.game === idx}>
+                    {gameItem.name}
+                  </CreateRoomGameText>
                 </CreateRoomGameWrapper>
               ))}
             </CreateRoomGameList>
@@ -206,15 +231,20 @@ export default Games;
 
 const RoomItem = ({ roomItem, idx }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const onClickRoom = () => {
+    let password = '';
+    if (roomItem.lock) {
+      password = window.prompt('비밀번호를 입력해주세요.');
+      if (password === '' || !password) return;
+    }
+    dispatch(changeRoomField({ key: 'password', value: password }));
+    navigate(`/games/${roomItem.code}`);
+  };
+
   return (
-    <RoomItemWrapper
-      color={roomItem.color}
-      status={roomItem.status}
-      idx={idx}
-      onClick={() => {
-        navigate(`/games/${roomItem.code}`);
-      }}
-    >
+    <RoomItemWrapper color={roomItem.color} idx={idx} onClick={onClickRoom}>
       <RoomImage src={GAME_LIST[roomItem.game].icon} alt="icon" />
       <RoomDataWrapper>
         <RoomTitle>{roomItem.name}</RoomTitle>
@@ -237,7 +267,7 @@ const Wrapper = styled.div`
   min-height: calc(100vh - 70px);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   -ms-user-select: none;
   -moz-user-select: -moz-none;
@@ -314,11 +344,9 @@ const ContentWrapper = styled.div`
   @keyframes appear {
     from {
       opacity: 0;
-      margin-top: 50px;
     }
     to {
       opacity: 1;
-      margin-top: 20px;
     }
   }
   @media all and (max-width: 1150px) {
@@ -362,26 +390,6 @@ const LobbyButtonWrapper = styled.div`
       color: black;
     }
   }
-`;
-const LobbyRoomWrapper = styled.div`
-  width: 100%;
-  max-height: 525px;
-  overflow-y: auto;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: flex-start;
-  border-top: 1px solid #848484;
-  padding-top: 5px;
-`;
-const NoDataText = styled.div`
-  width: 100%;
-  height: 510px;
-  text-align: center;
-  font-size: 36px;
-  font-family: 'Raleway', sans-serif;
-  color: #646464;
-  padding-top: 244.5px;
 `;
 const FastMatchButton = styled.div`
   width: 35%;
@@ -452,6 +460,26 @@ const CreateRoomButton = styled.div`
       font-size: 18px;
     }
   }
+`;
+const LobbyRoomWrapper = styled.div`
+  width: 100%;
+  max-height: 515px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  border-top: 1px solid #848484;
+  padding-top: 5px;
+`;
+const NoDataText = styled.div`
+  width: 100%;
+  height: 510px;
+  text-align: center;
+  font-size: 36px;
+  font-family: 'Raleway', sans-serif;
+  color: #646464;
+  padding-top: 244.5px;
 `;
 const ChattingWrapper = styled.div`
   width: calc(30% - 10px);
@@ -667,6 +695,7 @@ const RoomItemWrapper = styled.div`
   align-items: center;
   cursor: pointer;
   transition: box-shadow 0.15s linear;
+  border: 1px solid black;
   margin: ${props => makeRoomMargin(3, props.idx)};
   &:hover {
     box-shadow: 1px 1px 1px 1px #000000;

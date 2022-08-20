@@ -5,20 +5,22 @@ import { createGlobalStyle } from 'styled-components';
 import reset from 'styled-reset';
 
 import { addMessage, changeChatField } from 'modules/chats';
+import { getRoomList } from 'modules/rooms';
 
 import NanumSquareR from 'assets/fonts/NanumSquareR.ttf';
 
-import Header from 'pages/main/sections/Header';
-import Footer from 'pages/main/sections/Footer';
-import Home from 'pages/main/Home';
-import Games from 'pages/main/Games';
-import Room from 'pages/games/Room';
-import MatchRecord from 'pages/main/MatchRecord';
-import Ranking from 'pages/main/Ranking';
-import Information from 'pages/main/Information';
-import Signup from 'pages/main/user/Signup';
-import Login from 'pages/main/user/Login';
-import UserPage from 'pages/main/user/UserPage';
+import Header from 'components/sections/Header';
+import Footer from 'components/sections/Footer';
+import Home from 'pages/Home';
+import Games from 'pages/Games';
+import Room from 'pages/Room';
+import MatchRecord from 'pages/MatchRecord';
+import Ranking from 'pages/Ranking';
+import Information from 'pages/Information';
+import Signup from 'pages/user/Signup';
+import Login from 'pages/user/Login';
+import UserPage from 'pages/user/UserPage';
+import Test from 'Test'; ///////////////////////////////////////////////////
 
 const GlobalStyles = createGlobalStyle`
   ${reset}
@@ -85,10 +87,12 @@ function App() {
       ws.current = new WebSocket(`ws://localhost:8000/ws/chat/lobby/`);
       ws.current.onopen = () => {
         console.log('Lobby - CONNECTED');
+        dispatch(changeChatField({ key: 'isLobby', value: true }));
         dispatch(changeChatField({ key: 'socket', value: ws.current }));
       };
       ws.current.onclose = () => {
         console.log('Lobby - DISCONNECTED');
+        dispatch(changeChatField({ key: 'isLobby', value: false }));
       };
       ws.current.onerror = error => {
         console.log('Lobby - CONNECTION ERROR');
@@ -96,10 +100,10 @@ function App() {
       };
       ws.current.onmessage = e => {
         const data = JSON.parse(e.data);
-        if (data.type === 'chat') {
-          dispatch(addMessage({ key: 'chat', value: data.value }));
-        } else if (data.type === 'game') {
-          dispatch(addMessage({ key: 'game', value: data.value }));
+        if (data.type === 'LOBBY_UPDATE') {
+          dispatch(getRoomList());
+        } else if (data.type === 'CHATTING') {
+          dispatch(addMessage(data.value));
         }
       };
     }
@@ -124,6 +128,8 @@ function App() {
           <Route path="signup" element={<Signup />} />
           <Route path="login" element={<Login />} />
           <Route path="user/:username" element={<UserPage />} />
+
+          <Route path="test" element={<Test />} />
         </Routes>
         <Footer />
       </BrowserRouter>

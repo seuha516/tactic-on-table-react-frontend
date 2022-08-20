@@ -6,28 +6,30 @@ import * as roomsAPI from 'lib/api/rooms';
 const CHANGE_FIELD = 'rooms/CHANGE_FIELD';
 const [GET_LIST, GET_LIST_SUCCESS, GET_LIST_FAILURE] = createRequestActionTypes('rooms/GET_LIST');
 const [CREATE, CREATE_SUCCESS, CREATE_FAILURE] = createRequestActionTypes('rooms/CREATE');
-const [UPDATE, UPDATE_SUCCESS, UPDATE_FAILURE] = createRequestActionTypes('rooms/UPDATE');
+const [QUICK_MATCH, QUICK_MATCH_SUCCESS, QUICK_MATCH_FAILURE] =
+  createRequestActionTypes('rooms/QUICK_MATCH');
 
 export const changeRoomField = createAction(CHANGE_FIELD);
 export const getRoomList = createAction(GET_LIST);
 export const createRoom = createAction(CREATE);
-export const updateRoom = createAction(UPDATE);
+export const quickMatch = createAction(QUICK_MATCH);
 
 const getListSaga = createRequestSaga(GET_LIST, roomsAPI.getList);
 const createSaga = createRequestSaga(CREATE, roomsAPI.create);
-const updateSaga = createRequestSaga(UPDATE, roomsAPI.update);
+const quickMatchSage = createRequestSaga(QUICK_MATCH, roomsAPI.quickMatch);
 
 export function* roomsSaga() {
   yield takeLatest(GET_LIST, getListSaga);
   yield takeLatest(CREATE, createSaga);
-  yield takeLatest(UPDATE, updateSaga);
+  yield takeLatest(QUICK_MATCH, quickMatchSage);
 }
 
 const initialState = {
   list: null,
+  password: '',
   room: null,
   create: null,
-  update: null,
+  game: null,
 };
 
 const rooms = handleActions(
@@ -44,18 +46,18 @@ const rooms = handleActions(
       return { ...state, list: null };
     },
     [CREATE_SUCCESS]: (state, { payload }) => {
-      return { ...state, create: payload };
+      return { ...state, create: payload.code };
     },
     [CREATE_FAILURE]: (state, { payload: error }) => {
       alert(error.response.data.message);
       return { ...state, create: null };
     },
-    [UPDATE_SUCCESS]: (state, { payload }) => {
-      return { ...state, room: payload, update: true };
+    [QUICK_MATCH_SUCCESS]: (state, { payload }) => {
+      return { ...state, create: payload.code };
     },
-    [UPDATE_FAILURE]: (state, { payload: error }) => {
+    [QUICK_MATCH_FAILURE]: (state, { payload: error }) => {
       alert(error.response.data.message);
-      return { ...state, update: false };
+      return { ...state, create: null };
     },
   },
   initialState,

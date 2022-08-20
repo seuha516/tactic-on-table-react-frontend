@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import HomeBanner1 from './banner/HomeBanner1';
-import HomeBanner2 from './banner/HomeBanner2';
-import HomeBanner3 from './banner/HomeBanner3';
+import HomeBanner1 from 'components/banner/HomeBanner1';
+import HomeBanner2 from 'components/banner/HomeBanner2';
+import HomeBanner3 from 'components/banner/HomeBanner3';
 
 const Home = () => {
   return (

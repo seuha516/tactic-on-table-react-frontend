@@ -16,8 +16,8 @@ const MatchRecordItem = ({ record }) => {
       </GameWrapper>
       <DateWrapper1>{calcTime(record.date)}</DateWrapper1>
       <PlayerListWrapper>
-        {record.players.map(recordPlayer => (
-          <UserIcon key={recordPlayer.username} user={recordPlayer} size="40px" />
+        {record.players.map((recordPlayer, idx) => (
+          <UserIcon key={idx} user={recordPlayer} size="40px" />
         ))}
       </PlayerListWrapper>
       <MatchResult result={record.result} />

@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import ChatItem from 'components/chat/ChatItem';
 
-const Chatting = () => {
+const ChattingForRoom = () => {
   const { socket, me, chatLog } = useSelector(({ chats }) => ({
     socket: chats.socket,
     me: chats.me,
@@ -66,10 +66,11 @@ const Chatting = () => {
   );
 };
 
-export default Chatting;
+export default ChattingForRoom;
 
 const Wrapper = styled.div`
   width: 100%;
+  max-width: 675px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -77,7 +78,7 @@ const Wrapper = styled.div`
   align-items: center;
   border-radius: 15px;
   padding: 10px;
-  background-color: #e9e9e9;
+  background-color: #e3e3e3;
 `;
 const ChattingTitle = styled.div`
   width: 100%;
@@ -89,11 +90,11 @@ const ChattingTitle = styled.div`
 const LogWrapper = styled.div`
   width: 100%;
   height: 100%;
-  max-height: 500px;
+  max-height: 575px;
   padding: 7.5px 0;
   overflow-y: auto;
   border-bottom: 2px solid #00000020;
-  @media all and (max-width: 1150px) {
+  @media all and (max-width: 1450px) {
     max-height: 260px;
   }
   &::-webkit-scrollbar {
