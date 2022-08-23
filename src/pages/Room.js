@@ -37,7 +37,7 @@ const Room = () => {
     }
 
     ws.current = new WebSocket(
-      `ws://${process.env.REACT_APP_API_SOCKET_URL}/ws/chat/${code}/${
+      `wss://${process.env.REACT_APP_API_SOCKET_URL}/ws/chat/${code}/${
         password !== '' ? `${password}/` : ''
       }`,
     );

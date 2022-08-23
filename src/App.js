@@ -84,7 +84,7 @@ function App() {
   let ws = useRef(null);
   useEffect(() => {
     if (!ws.current) {
-      ws.current = new WebSocket(`ws://${process.env.REACT_APP_API_SOCKET_URL}/ws/chat/lobby/`);
+      ws.current = new WebSocket(`wss://${process.env.REACT_APP_API_SOCKET_URL}/ws/chat/lobby/`);
       ws.current.onopen = () => {
         console.log('Lobby - CONNECTED');
         dispatch(changeChatField({ key: 'isLobby', value: true }));
