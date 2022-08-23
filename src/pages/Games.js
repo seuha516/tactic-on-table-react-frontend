@@ -54,6 +54,7 @@ const Games = () => {
         !popUpRef2.current.contains(e.target)
       ) {
         setPopUp(POPUP_STATUS.NONE);
+        setRoomInfo(DEFAULT_ROOM_INFO);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -112,12 +113,7 @@ const Games = () => {
               <div>빠른 입장</div>
               <BiFileFind />
             </FastMatchButton>
-            <CreateRoomButton
-              onClick={() => {
-                setPopUp(POPUP_STATUS.CREATE_ROOM);
-                setRoomInfo(DEFAULT_ROOM_INFO);
-              }}
-            >
+            <CreateRoomButton onClick={() => setPopUp(POPUP_STATUS.CREATE_ROOM)}>
               <div>방 만들기</div>
               <FiUserPlus />
             </CreateRoomButton>
@@ -129,7 +125,7 @@ const Games = () => {
                 <NoDataText>No Room</NoDataText>
               ) : (
                 roomList.map((roomItem, idx) => (
-                  <RoomItem key={roomItem.num} idx={idx} roomItem={roomItem} />
+                  <RoomItem key={idx} idx={idx} roomItem={roomItem} />
                 ))
               )
             ) : (
@@ -169,7 +165,12 @@ const Games = () => {
         <CreateRoomPopUp open={popUp === POPUP_STATUS.CREATE_ROOM} ref={popUpRef2}>
           <CloseCreateRoomPopUp>
             <CloseCreateRoomPopUpTitle>Create Room</CloseCreateRoomPopUpTitle>
-            <AiOutlineCloseCircle onClick={() => setPopUp(POPUP_STATUS.NONE)} />
+            <AiOutlineCloseCircle
+              onClick={() => {
+                setPopUp(POPUP_STATUS.NONE);
+                setRoomInfo(DEFAULT_ROOM_INFO);
+              }}
+            />
           </CloseCreateRoomPopUp>
           <CreateRoomWrapper>
             <CreateRoomInputText>Room Name</CreateRoomInputText>
@@ -463,7 +464,7 @@ const CreateRoomButton = styled.div`
 `;
 const LobbyRoomWrapper = styled.div`
   width: 100%;
-  max-height: 515px;
+  max-height: 525px;
   overflow-y: auto;
   display: flex;
   flex-wrap: wrap;

@@ -18,13 +18,26 @@ const UserIcon = ({ user, size, winner }) => {
   }, []);
 
   if (user) {
-    return (
-      <Wrapper to={`/user/${user.username}`} style={{ width: size, height: size }}>
-        <ProfileImage src={process.env.REACT_APP_API_IMAGE + user.image} winner={winner} />
-        {tagVisible && <ProfileNickname>{user.nickname}</ProfileNickname>}
-        <FakeBarrier ref={nicknameRef} />
-      </Wrapper>
-    );
+    if (user.username.substring(0, 2) === '익명') {
+      return (
+        <WrapperDiv style={{ width: size, height: size }}>
+          <ProfileImage
+            src={process.env.REACT_APP_API_IMAGE + 'profile_default.png'}
+            winner={winner}
+          />
+          {tagVisible && <ProfileNickname>{user.nickname}</ProfileNickname>}
+          <FakeBarrier ref={nicknameRef} />
+        </WrapperDiv>
+      );
+    } else {
+      return (
+        <Wrapper to={`/user/${user.username}`} style={{ width: size, height: size }}>
+          <ProfileImage src={process.env.REACT_APP_API_IMAGE + user.image} winner={winner} />
+          {tagVisible && <ProfileNickname>{user.nickname}</ProfileNickname>}
+          <FakeBarrier ref={nicknameRef} />
+        </Wrapper>
+      );
+    }
   } else {
     return (
       <WrapperDiv style={{ width: size, height: size }}>

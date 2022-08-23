@@ -1,19 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { BsFillPencilFill } from 'react-icons/bs';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import ChatItem from 'components/chat/ChatItem';
 
 const ChattingForRoom = () => {
-  const { socket, me, chatLog } = useSelector(({ chats }) => ({
+  const { socket, me, chatLog, game } = useSelector(({ chats, rooms }) => ({
     socket: chats.socket,
     me: chats.me,
     chatLog: chats.chatLog,
+    game: rooms.game,
   }));
+  const [mode, setMode] = useState(0);
   const [chatInput, setChatInput] = useState('');
   const chatLogRef = useRef(null);
 
+  useEffect(() => {
+    if (game === null) setMode(0);
+  }, [game]);
   useEffect(() => {
     scrollEnd();
   }, []);
@@ -43,11 +48,32 @@ const ChattingForRoom = () => {
 
   return (
     <Wrapper>
-      <ChattingTitle>Chat</ChattingTitle>
+      <ChattingTitle>
+        <ChattingModeText on={mode === 0 ? 'true' : 'false'} onClick={() => setMode(0)}>
+          Chat
+        </ChattingModeText>
+        {game && game.log && (
+          <ChattingModeText on={mode === 1 ? 'true' : 'false'} onClick={() => setMode(1)}>
+            Log
+          </ChattingModeText>
+        )}
+      </ChattingTitle>
       <LogWrapper ref={chatLogRef}>
-        {chatLog.map((chatItem, idx) => (
-          <ChatItem key={idx} chatItem={chatItem} myUsername={me ? me.username : null} />
-        ))}
+        {mode === 0
+          ? chatLog.map((chatItem, idx) => (
+              <ChatItem key={idx} chatItem={chatItem} myUsername={me ? me.username : null} />
+            ))
+          : game &&
+            game.log.map(
+              (x, idx) =>
+                idx % 2 === 0 && (
+                  <LogRowWrapper key={idx}>
+                    <LogNumber>{idx / 2 + 1}</LogNumber>
+                    <LogItem color={0}>{x}</LogItem>
+                    {idx + 1 < game.log.length && <LogItem color={1}>{game.log[idx + 1]}</LogItem>}
+                  </LogRowWrapper>
+                ),
+            )}
       </LogWrapper>
       <ChattingInputWrapper>
         <InputWrapper
@@ -70,8 +96,6 @@ export default ChattingForRoom;
 
 const Wrapper = styled.div`
   width: 100%;
-  max-width: 675px;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -86,15 +110,33 @@ const ChattingTitle = styled.div`
   font-size: 25px;
   font-family: 'Lato', sans-serif;
   border-bottom: 2px solid #00000020;
+  display: flex;
+  justify-content: space-between;
+`;
+const ChattingModeText = styled.div`
+  cursor: pointer;
+  ${props =>
+    props.on === 'true'
+      ? css`
+          color: #000000;
+        `
+      : css`
+          color: #878787;
+        `}
 `;
 const LogWrapper = styled.div`
   width: 100%;
-  height: 100%;
+  height: 575px;
   max-height: 575px;
   padding: 7.5px 0;
   overflow-y: auto;
   border-bottom: 2px solid #00000020;
   @media all and (max-width: 1450px) {
+    height: 635px;
+    max-height: 635px;
+  }
+  @media all and (max-width: 1200px) {
+    height: 260px;
     max-height: 260px;
   }
   &::-webkit-scrollbar {
@@ -135,4 +177,35 @@ const InputWriteButton = styled.div`
   &:hover {
     background-color: #525252;
   }
+`;
+const LogRowWrapper = styled.div`
+  width: 100%;
+  height: 28px;
+  margin-bottom: 5px;
+  display: flex;
+
+  font-size: 18px;
+  font-family: NanumSquareR;
+  text-align: center;
+`;
+const LogNumber = styled.div`
+  width: 40px;
+  font-size: 20px;
+  font-weight: 600;
+  padding-top: 4px;
+  background-color: #efc568;
+`;
+const LogItem = styled.div`
+  padding-top: 6px;
+  width: calc(50% - 20px);
+  ${props =>
+    props.color === 0
+      ? css`
+          background-color: #ffffff;
+          color: #000000;
+        `
+      : css`
+          background-color: #000000;
+          color: #ffffff;
+        `}
 `;

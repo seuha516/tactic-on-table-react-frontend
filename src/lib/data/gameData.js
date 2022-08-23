@@ -33,7 +33,7 @@ export const GAME_LIST = [
   },
 ];
 
-export const CHESS_PLAYER_COLOR = ['#ffffff', '#000000', '#e9e9e9'];
+export const CHESS_PLAYER_COLOR = ['#ffffff', '#000000'];
 export const CHESS_COLOR = {
   WHITE: 0,
   BLACK: 1,

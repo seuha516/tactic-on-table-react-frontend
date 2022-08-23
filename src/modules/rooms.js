@@ -27,8 +27,8 @@ export function* roomsSaga() {
 const initialState = {
   list: null,
   password: '',
-  room: null,
   create: null,
+  room: null,
   game: null,
 };
 

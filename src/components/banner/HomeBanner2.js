@@ -3,15 +3,11 @@ import styled, { css } from 'styled-components';
 
 import { GAME_LIST } from 'lib/data/gameData';
 
-const HomeBanner2 = ({ gameidx }) => {
-  const onPlayGame = gameidx => {
-    alert(`play ${GAME_LIST[gameidx].name}`);
-  };
-
+const HomeBanner2 = ({ gameidx, onQuickMatch }) => {
   return (
     <Wrapper>
       <img src={GAME_LIST[gameidx].banner} alt="gameBanner" />
-      <Text gameidx={gameidx} onClick={() => onPlayGame(gameidx)}>
+      <Text gameidx={gameidx} onClick={() => onQuickMatch(gameidx)}>
         <div>Play</div>
         <div gameidx={gameidx}>{GAME_LIST[gameidx].name}</div>
       </Text>
