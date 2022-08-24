@@ -8,7 +8,7 @@ const DeadPieces = ({ color, kill, etc }) => {
     return (
       <WrapperForEtc>
         <Pieces>
-          {kill.map((x, idx) => (
+          {kill.sort().map((x, idx) => (
             <Image
               key={idx}
               src={CHESS_PIECE_LIST[x][`${color === CHESS_COLOR.WHITE ? 'black' : 'white'}Image`]}
@@ -22,7 +22,7 @@ const DeadPieces = ({ color, kill, etc }) => {
     return (
       <Wrapper>
         <Pieces>
-          {kill.map((x, idx) => (
+          {kill.sort().map((x, idx) => (
             <Image
               key={idx}
               src={CHESS_PIECE_LIST[x][`${color === CHESS_COLOR.WHITE ? 'black' : 'white'}Image`]}
